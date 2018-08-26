@@ -9,11 +9,11 @@
 
   <div id="gameDiv" style="display:none;">
 
-    <div id="game" style="position:absolute;width:500px;height:100px;">
-      <canvas id="ctx" width="500" height="500" style="position:absolute;border:1px solid black;background-color: black;"></canvas>
-      <canvas id="ctx-ui" width="500" height="500" style="position:absolute;border:1px solid black;"></canvas>
+    <div id="game" style="position:absolute;width:1300px;height:100px;">
+      <canvas id="ctx" width="1300" height="800" style="position:absolute;border:1px solid black;background-color: black;"></canvas>
+      <canvas id="ctx-ui" width="1300" height="800" style="position:absolute;border:1px solid black;"></canvas>
 
-      <div id="ui" style="position:absolute;width:500px;height:500px;">
+      <div id="ui" style="position:absolute;width:1300px;height:800px;">
         <button onclick="changeMap()" style="position:absolute;bottom: 0px;left:0px">
           Change Map
         </button>
@@ -22,13 +22,13 @@
 
     </div>
 
-    <div id="belowGame" style="margin-top:520px;">
-      <div id="chat-text" style="width:500px;height:100px;overflow-y:scroll">
+    <div id="belowGame" style="margin-top:820px;">
+      <div id="chat-text" style="width:1300px;height:100px;overflow-y:scroll">
         <div>First MSG</div>
       </div>
 
       <form id="chat-form">
-        <input id="chat-input" type="text" style="width:500px"></input>
+        <input id="chat-input" type="text" style="width:1300px"></input>
       </form>
     </div>
 
@@ -38,8 +38,8 @@
 
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <script>
-  const WIDTH = 500;
-  const HEIGHT = 500;
+  const WIDTH = 1300;
+  const HEIGHT = 800;
   const socket = io();
 
   //sign
@@ -265,7 +265,7 @@
   setInterval(function () {
     if(!selfId)
       return;
-    ctx.clearRect(0,0,500,500);
+    ctx.clearRect(0,0,1300,800);
     currentMap.draw();
     drawScore();
     for(let i in Player.list){
@@ -291,7 +291,7 @@
       let player = Player.list[selfId];
       let x = WIDTH/2 - player.x;
       let y = HEIGHT/2 - player.y;
-      ctx.drawImage(self.image,0,0,self.image.width,self.image.height,x,y,self.image.width*2,self.image.height*2);
+      ctx.drawImage(self.image,0,0,self.image.width,self.image.height,x,y,self.image.width*4,self.image.height*4);
     }
     return self;
   }
@@ -311,7 +311,7 @@
     if(lastScore === Player.list[selfId].score){
       return;
     }
-    ctxUi.clearRect(0,0,500,500);
+    ctxUi.clearRect(0,0,1300,800);
     lastScore = Player.list[selfId].score;
     ctxUi.fillStyle = 'black';
     ctxUi.fillText(Player.list[selfId].score,0,30);
@@ -342,8 +342,8 @@
   }
 
   document.onmousedown = function(event){
-    let x = -250 + event.clientX - 8;
-    let y = -250 + event.clientY - 8;
+    let x = -400 + event.clientX - 8;
+    let y = -400 + event.clientY - 8;
     let angle = Math.atan2(y,x) / Math.PI * 180;
     socket.emit('keyPress', {inputId: 'attack', state:true, angle:angle});
   }
@@ -355,12 +355,12 @@
   const canvas = document.getElementById("ctx");
 
   const body = document.body.getBoundingClientRect()
-  console.log(body.right/2);
+
 
   document.onmousemove = function(event){
     const body = document.body.getBoundingClientRect()
     let x = -body.right/2 + event.clientX - 8 ;
-    let y = -250 + event.clientY - 8 ;
+    let y = -400 + event.clientY - 8 ;
     let angle = Math.atan2(y,x) / Math.PI * 180;
     socket.emit('keyPress', {inputId: 'mouseAngle', state:angle});
   }

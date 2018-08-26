@@ -22,8 +22,8 @@ const SOCKET_LIST = {};
 
 const Entity = function(param){
   let self = {
-    x:500,
-    y:500,
+    x:1300,
+    y:800,
     id:"",
     spdX:0,
     spdY:0,
@@ -80,11 +80,11 @@ const Player = function(param){
     super_update();
     if(self.pressingRight || self.pressingDown || self.pressingLeft ||self.pressingUp)
       self.spriteAnimCounter += 0.2;
-    if(self.x > 1280-20){
-      self.x = 1280-20;
+    if(self.x > 2560-20){
+      self.x = 2560-20;
     }
-    if(self.y > 1280-40){
-      self.y = 1280-40;
+    if(self.y > 2560-40){
+      self.y = 2560-40;
     }
     if(self.x < 20){
       self.x = 20;
