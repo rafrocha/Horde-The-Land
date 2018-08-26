@@ -1,37 +1,40 @@
-<div id="signDiv">
-  Username: <input id="signDiv-username" type="text"></input><br>
-  Password: <input id="signDiv-password" type="password"></input>
-  <button id="signDiv-signIn">Sign In</button>
-  <button id="signDiv-signUp">Sign Up</button>
-</div>
+<body style="display: flex;justify-content: center;">
+  <div id="signDiv">
+    Username: <input id="signDiv-username" type="text"></input><br>
+    Password: <input id="signDiv-password" type="password"></input>
+    <button id="signDiv-signIn">Sign In</button>
+    <button id="signDiv-signUp">Sign Up</button>
+  </div>
 
 
-<div id="gameDiv" style="display:none;">
+  <div id="gameDiv" style="display:none;">
 
-  <div id="game" style="position:absolute;width:500px;height:100px;">
-    <canvas id="ctx" width="500" height="500" style="position:absolute;border:1px solid #000000;"></canvas>
-    <canvas id="ctx-ui" width="500" height="500" style="position:absolute;border:1px solid #000000;"></canvas>
+    <div id="game" style="position:absolute;width:500px;height:100px;">
+      <canvas id="ctx" width="500" height="500" style="position:absolute;border:1px solid black;background-color: black;"></canvas>
+      <canvas id="ctx-ui" width="500" height="500" style="position:absolute;border:1px solid black;"></canvas>
 
-    <div id="ui" style="position:absolute;width:500px;height:500px;">
-      <button onclick="changeMap()" style="position:absolute;bottom: 0px;left:0px">
-        Change Map
-      </button>
+      <div id="ui" style="position:absolute;width:500px;height:500px;">
+        <button onclick="changeMap()" style="position:absolute;bottom: 0px;left:0px">
+          Change Map
+        </button>
 
+      </div>
+
+    </div>
+
+    <div id="belowGame" style="margin-top:520px;">
+      <div id="chat-text" style="width:500px;height:100px;overflow-y:scroll">
+        <div>First MSG</div>
+      </div>
+
+      <form id="chat-form">
+        <input id="chat-input" type="text" style="width:500px"></input>
+      </form>
     </div>
 
   </div>
 
-  <div id="belowGame" style="margin-top:520px;">
-    <div id="chat-text" style="width:500px;height:100px;overflow-y:scroll">
-      <div>First MSG</div>
-    </div>
-
-    <form id="chat-form">
-      <input id="chat-input" type="text" style="width:500px"></input>
-    </form>
-  </div>
-
-</div>
+</body>
 
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 <script>
@@ -56,7 +59,7 @@
       signDiv.style.display = 'none';
       gameDiv.style.display = 'inline-block';
     } else {
-      alertaw('Sign in unsuccessful.');
+      alert('Sign in unsuccessful.');
     }
   })
 
@@ -93,7 +96,7 @@
 
   //game stuff
 
-  const skins = ['/client/img/player1.png','/client/img/player2.png']
+  // const skins = ['/client/img/player1.png','/client/img/player2.png']
 
   const Img = {};
   Img.player = new Image();
@@ -120,6 +123,7 @@
     self.mouseAngle = initPack.mouseAngle;
     self.spriteAnimCounter = initPack.spriteAnimCounter;
     self.bulletAngle = initPack.bulletAngle;
+    self.playername = initPack.playername;
 
     self.draw = function() {
       if(Player.list[selfId].map !== self.map){
@@ -134,6 +138,10 @@
       ctx.fillRect(x - 40/2, y - 35, 40, 4);
       ctx.fillStyle = 'blue';
       ctx.fillRect(x - 40/2, y - 35, hpWidth, 4);
+
+      ctx.fillStyle = 'black';
+      ctx.font = '18px Arial'
+      ctx.fillText(self.playername,x - 40/2,y - 39);
 
       let width = Img.player.width/1.2;
       let height = Img.player.height/1.5;
@@ -344,9 +352,15 @@
     socket.emit('keyPress', {inputId: 'attack', state:false});
   }
 
+  const canvas = document.getElementById("ctx");
+
+  const body = document.body.getBoundingClientRect()
+  console.log(body.right/2);
+
   document.onmousemove = function(event){
-    let x = -250 + event.clientX - 8;
-    let y = -250 + event.clientY - 8;
+    const body = document.body.getBoundingClientRect()
+    let x = -body.right/2 + event.clientX - 8 ;
+    let y = -250 + event.clientY - 8 ;
     let angle = Math.atan2(y,x) / Math.PI * 180;
     socket.emit('keyPress', {inputId: 'mouseAngle', state:angle});
   }

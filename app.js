@@ -71,6 +71,7 @@ const Player = function(param){
   self.score = 0;
   self.spriteAnimCounter = 0;
   self.bulletAngle = 0;
+  self.playername = param.playername;
 
   const super_update = self.update;
 
@@ -79,11 +80,11 @@ const Player = function(param){
     super_update();
     if(self.pressingRight || self.pressingDown || self.pressingLeft ||self.pressingUp)
       self.spriteAnimCounter += 0.2;
-    if(self.x > 1280-20){
-      self.x = 1280-20;
+    if(self.x > 1920-20){
+      self.x = 1920-20;
     }
-    if(self.y > 1280-40){
-      self.y = 1280-40;
+    if(self.y > 1920-40){
+      self.y = 1920-40;
     }
     if(self.x < 20){
       self.x = 20;
@@ -133,7 +134,8 @@ const Player = function(param){
       map: self.map,
       mouseAngle: self.mouseAngle,
       spriteAnimCounter: self.spriteAnimCounter,
-      bulletAngle: self.bulletAngle
+      bulletAngle: self.bulletAngle,
+      playername: self.playername
     }
   }
 
@@ -165,6 +167,7 @@ Player.onConnect = function (socket){
   }
   const player = Player({
     id: socket.id,
+    playername: socket.playername,
     map: map
   });
 
@@ -315,15 +318,15 @@ Bullet.getAllInitPack = function() {
 
 let DEBUG = true;
 
-let USERS = {
-  "bob":"asd",
-  "peter":"qwe",
-  "mary":"zxc"
-}
+// let USERS = {
+//   "bob":"asd",
+//   "peter":"qwe",
+//   "mary":"zxc"
+// }
 
-let isValidPassword = function(data){
-  return USERS[data.username] === data.password;
-}
+// let isValidPassword = function(data){
+//   return USERS[data.username] === data.password;
+// }
 
 io.sockets.on('connection', function(socket){
 
@@ -331,12 +334,9 @@ io.sockets.on('connection', function(socket){
   SOCKET_LIST[socket.id] = socket
 
   socket.on('signIn', function(data){
-    if(isValidPassword(data)){
+    socket.playername = data.username;
     Player.onConnect(socket);
     socket.emit('signInResponse', {success:true});
-    } else {
-      socket.emit('signInResponse', {success:false});
-    }
   })
 
   //outputs on TERMINAL when a Player joins the game
@@ -344,7 +344,7 @@ io.sockets.on('connection', function(socket){
 
 
   socket.on('sendMsgToServer', function(data){
-    let playerName = (""+socket.id).slice(2,7);
+    let playerName = socket.playername;
     for(let i in SOCKET_LIST){
       SOCKET_LIST[i].emit('addToChat', playerName + ': ' + data);
     }
