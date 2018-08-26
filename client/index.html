@@ -117,7 +117,9 @@
     self.maxHP = initPack.maxHP;
     self.score = initPack.score;
     self.map = initPack.map;
-    self.angle = 45;
+    self.mouseAngle = initPack.mouseAngle;
+    self.spriteAnimCounter = initPack.spriteAnimCounter;
+    self.bulletAngle = initPack.bulletAngle;
 
     self.draw = function() {
       if(Player.list[selfId].map !== self.map){
@@ -127,8 +129,11 @@
       let y = self.y - Player.list[selfId].y + HEIGHT/2;
 
       let hpWidth = 40 * self.hp / self.maxHP;
+
       ctx.fillStyle = 'red';
-      ctx.fillRect(x - hpWidth/2, y - 35, hpWidth, 4);
+      ctx.fillRect(x - 40/2, y - 35, 40, 4);
+      ctx.fillStyle = 'blue';
+      ctx.fillRect(x - 40/2, y - 35, hpWidth, 4);
 
       let width = Img.player.width/1.2;
       let height = Img.player.height/1.5;
@@ -137,7 +142,7 @@
       let frameHeight = Img.player.height/3.9;
 
       let directionMod = 3;
-      let angle = Player.list[selfId].angle;
+      let angle = self.mouseAngle;
 
       if(angle < 0)
         angle = 360 + angle;
@@ -149,7 +154,9 @@
       else if(angle >= 225 && angle < 315 )
         directionMod = 0;
 
-      ctx.drawImage(Img.player,0,directionMod*frameHeight,frameWidth,frameHeight, x-width/2,y-height/2,width,height);
+      let walkingMod = Math.floor(self.spriteAnimCounter) % 3;
+
+      ctx.drawImage(Img.player,walkingMod*frameWidth,directionMod*frameHeight,frameWidth,frameHeight, x-width/2,y-height/2,width,height);
 
     }
 
@@ -217,6 +224,12 @@
           p.score = pack.score;
         if (pack.map !== undefined)
           p.map = pack.map;
+        if (pack.mouseAngle !== undefined)
+          p.mouseAngle = pack.mouseAngle;
+        if (pack.spriteAnimCounter !== undefined)
+          p.spriteAnimCounter = pack.spriteAnimCounter;
+        if (pack.bulletAngle !== undefined)
+          p.bulletAngle = pack.bulletAngle;
       }
     }
 
@@ -292,7 +305,7 @@
     }
     ctxUi.clearRect(0,0,500,500);
     lastScore = Player.list[selfId].score;
-    ctxUi.fillStyle = 'white';
+    ctxUi.fillStyle = 'black';
     ctxUi.fillText(Player.list[selfId].score,0,30);
   }
 
@@ -321,7 +334,10 @@
   }
 
   document.onmousedown = function(event){
-    socket.emit('keyPress', {inputId: 'attack', state:true});
+    let x = -250 + event.clientX - 8;
+    let y = -250 + event.clientY - 8;
+    let angle = Math.atan2(y,x) / Math.PI * 180;
+    socket.emit('keyPress', {inputId: 'attack', state:true, angle:angle});
   }
 
   document.onmouseup = function(event){
@@ -332,7 +348,6 @@
     let x = -250 + event.clientX - 8;
     let y = -250 + event.clientY - 8;
     let angle = Math.atan2(y,x) / Math.PI * 180;
-    Player.list[selfId].angle = angle;
     socket.emit('keyPress', {inputId: 'mouseAngle', state:angle});
   }
 

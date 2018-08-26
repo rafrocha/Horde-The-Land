@@ -69,12 +69,16 @@ const Player = function(param){
   self.hp = 10;
   self.maxHP = 10;
   self.score = 0;
+  self.spriteAnimCounter = 0;
+  self.bulletAngle = 0;
 
   const super_update = self.update;
 
   self.update = function (){
     self.updateSpd();
     super_update();
+    if(self.pressingRight || self.pressingDown || self.pressingLeft ||self.pressingUp)
+      self.spriteAnimCounter += 0.2;
     if(self.x > 1280-20){
       self.x = 1280-20;
     }
@@ -88,7 +92,7 @@ const Player = function(param){
       self.y = 35;
     }
     if(self.pressingAttack){
-      self.shootBullet(self.mouseAngle);
+      self.shootBullet(self.bulletAngle);
     }
   }
 
@@ -126,7 +130,10 @@ const Player = function(param){
       hp: self.hp,
       maxHP: self.maxHP,
       score: self.score,
-      map: self.map
+      map: self.map,
+      mouseAngle: self.mouseAngle,
+      spriteAnimCounter: self.spriteAnimCounter,
+      bulletAngle: self.bulletAngle
     }
   }
 
@@ -137,7 +144,10 @@ const Player = function(param){
       y: self.y,
       hp: self.hp,
       score: self.score,
-      map: self.map
+      map: self.map,
+      mouseAngle: self.mouseAngle,
+      spriteAnimCounter: self.spriteAnimCounter,
+      bulletAngle: self.bulletAngle
     }
   }
 
@@ -159,18 +169,23 @@ Player.onConnect = function (socket){
   });
 
   socket.on('keyPress',function(data){
-    if(data.inputId === 'left')
-      player.pressingLeft = data.state;
-    else if(data.inputId === 'right')
-      player.pressingRight = data.state;
-    else if(data.inputId === 'up')
-      player.pressingUp = data.state;
-    else if(data.inputId === 'down')
-      player.pressingDown = data.state;
-    else if(data.inputId === 'attack')
+    if(data.inputId === 'left'){
+      player.mouseAngle = 135;
+      player.pressingLeft = data.state;}
+    else if(data.inputId === 'right'){
+      player.mouseAngle = 44;
+      player.pressingRight = data.state;}
+    else if(data.inputId === 'up'){
+      player.mouseAngle = 225;
+      player.pressingUp = data.state;}
+    else if(data.inputId === 'down'){
+      player.mouseAngle = 45;
+      player.pressingDown = data.state;}
+    else if(data.inputId === 'attack'){
       player.pressingAttack = data.state;
+      player.mouseAngle = data.angle;}
     else if(data.inputId === 'mouseAngle')
-      player.mouseAngle = data.state;
+      player.bulletAngle = data.state;
   });
 
   socket.on('changeMap', function(data) {
@@ -240,8 +255,8 @@ const Bullet = function(param){
             shooter.score += 1;
           }
           p.hp = p.maxHP;
-          p.x = Math.random() * 500;
-          p.y = Math.random() * 500;
+          p.x = Math.random() * 1000;
+          p.y = Math.random() * 1000;
         }
 
         self.toRemove = true;
