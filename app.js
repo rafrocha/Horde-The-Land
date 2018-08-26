@@ -78,8 +78,8 @@ const Player = function(param){
     if(self.x > 1280-20){
       self.x = 1280-20;
     }
-    if(self.y > 1280-25){
-      self.y = 1280-25;
+    if(self.y > 1280-40){
+      self.y = 1280-40;
     }
     if(self.x < 20){
       self.x = 20;
