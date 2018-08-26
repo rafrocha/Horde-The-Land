@@ -2,6 +2,8 @@ const express = require('express');
 const app = express();
 const serv = require('http').Server(app);
 const io = require('socket.io')(serv,{});
+// const profiler = require('v8-profiler');
+// const fs = require('fs');
 
 const PORT = process.env.PORT || 3000;
 
@@ -18,14 +20,27 @@ serv.listen(PORT, () => {
 const SOCKET_LIST = {};
 
 
-const Entity = function(){
+const Entity = function(param){
   let self = {
-    x:250,
-    y:250,
+    x:500,
+    y:500,
     id:"",
     spdX:0,
-    spdY:0
+    spdY:0,
+    map: 'forest'
   }
+
+  if(param){
+    if(param.x)
+      self.x = param.x;
+    if(param.y)
+      self.y = param.y;
+    if(param.map)
+      self.map = param.map;
+    if(param.id)
+      self.id = param.id;
+  }
+
   self.update = function(){
     self.updatePosition();
   }
@@ -41,11 +56,8 @@ const Entity = function(){
   return self;
 }
 
-const Player = function(id){
-
-  let self = Entity();
-
-  self.id = id;
+const Player = function(param){
+  let self = Entity(param);
   self.number = "" + Math.floor(50 * Math.random());
   self.pressingRight = false;
   self.pressingLeft = false;
@@ -63,16 +75,31 @@ const Player = function(id){
   self.update = function (){
     self.updateSpd();
     super_update();
-
+    if(self.x > 1280-20){
+      self.x = 1280-20;
+    }
+    if(self.y > 1280-25){
+      self.y = 1280-25;
+    }
+    if(self.x < 20){
+      self.x = 20;
+    }
+    if(self.y < 35){
+      self.y = 35;
+    }
     if(self.pressingAttack){
       self.shootBullet(self.mouseAngle);
     }
   }
 
   self.shootBullet = function(angle){
-    let bullet = Bullet(self.id,angle);
-    bullet.x = self.x;
-    bullet.y = self.y;
+    Bullet({
+      parent: self.id,
+      angle: angle,
+      x: self.x,
+      y: self.y,
+      map: self.map
+    });
   }
 
   self.updateSpd = function(){
@@ -88,7 +115,6 @@ const Player = function(id){
     } else if(self.pressingDown){
       self.spdY = self.maxSpd;
     } else self.spdY = 0;
-
   }
 
   self.getInitPack = function () {
@@ -99,7 +125,8 @@ const Player = function(id){
       number: self.number,
       hp: self.hp,
       maxHP: self.maxHP,
-      score: self.score
+      score: self.score,
+      map: self.map
     }
   }
 
@@ -109,11 +136,12 @@ const Player = function(id){
       x: self.x,
       y: self.y,
       hp: self.hp,
-      score: self.score
+      score: self.score,
+      map: self.map
     }
   }
 
-  Player.list[id] = self;
+  Player.list[self.id] = self;
 
   initPack.player.push(self.getInitPack());
   return self;
@@ -121,7 +149,15 @@ const Player = function(id){
 
 Player.list = {};
 Player.onConnect = function (socket){
-  const player = Player(socket.id);
+  let map = 'forest';
+  if(Math.random() < 0.5){
+    map = 'field';
+  }
+  const player = Player({
+    id: socket.id,
+    map: map
+  });
+
   socket.on('keyPress',function(data){
     if(data.inputId === 'left')
       player.pressingLeft = data.state;
@@ -136,6 +172,14 @@ Player.onConnect = function (socket){
     else if(data.inputId === 'mouseAngle')
       player.mouseAngle = data.state;
   });
+
+  socket.on('changeMap', function(data) {
+    if(player.map === 'field'){
+      player.map = 'forest';
+    } else {
+      player.map = 'field';
+    }
+  })
 
   socket.emit('init', {
     selfId: socket.id,
@@ -167,12 +211,14 @@ Player.updateAll = function(){
 };
 
 
-const Bullet = function(parent, angle){
-  let self = Entity();
+const Bullet = function(param){
+  let self = Entity(param);
   self.id = Math.random();
-  self.spdX = Math.cos(angle/180*Math.PI) * 10;
-  self.spdY = Math.sin(angle/180*Math.PI) * 10;
-  self.parent = parent;
+  self.spdX = Math.cos(param.angle/180*Math.PI) * 10;
+  self.spdY = Math.sin(param.angle/180*Math.PI) * 10;
+  self.parent = param.parent;
+
+
   self.timer = 0;
   self.toRemove = false;
   let super_update = self.update;
@@ -185,7 +231,7 @@ const Bullet = function(parent, angle){
 
     for (let i in Player.list){
       let p = Player.list[i];
-      if(self.getDistance(p) < 32 && self.parent!== p.id){
+      if(self.map === p.map && self.getDistance(p) < 32 && self.parent!== p.id){
         p.hp -= 1;
 
         if (p.hp <= 0) {
@@ -207,7 +253,8 @@ const Bullet = function(parent, angle){
     return {
       id: self.id,
       x: self.x,
-      y: self.y
+      y: self.y,
+      map: self.map
     }
   }
 
@@ -327,3 +374,23 @@ setInterval(function(){
   removePack.bullet = [];
 
 }, 1000/25);
+
+
+// const startProfiling = function(duration) {
+//   profiler.startProfiling('1',true);
+//   setTimeout(function() {
+//     let profile1 = profiler.stopProfiling('1');
+
+//     profile1.export(function(error, result) {
+//       fs.writeFile('./profile.cpuprofile', result);
+//       profile1.delete();
+//       console.log("Profile saved");
+//     });
+//   }, duration);
+// };
+
+// startProfiling(10000);
+
+
+
+

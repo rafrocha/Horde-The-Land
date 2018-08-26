@@ -7,15 +7,30 @@
 
 
 <div id="gameDiv" style="display:none;">
-  <canvas id="ctx" width="500" height="500" style="border:1px solid #000000;"></canvas>
 
-  <div id="chat-text" style="width:500px;height:100px;overflow-y:scroll">
-    <div>First MSG</div>
+  <div id="game" style="position:absolute;width:500px;height:100px;">
+    <canvas id="ctx" width="500" height="500" style="position:absolute;border:1px solid #000000;"></canvas>
+    <canvas id="ctx-ui" width="500" height="500" style="position:absolute;border:1px solid #000000;"></canvas>
+
+    <div id="ui" style="position:absolute;width:500px;height:500px;">
+      <button onclick="changeMap()" style="position:absolute;bottom: 0px;left:0px">
+        Change Map
+      </button>
+
+    </div>
+
   </div>
 
-  <form id="chat-form">
-    <input id="chat-input" type="text" style="width:500px"></input>
-  </form>
+  <div id="belowGame" style="margin-top:520px;">
+    <div id="chat-text" style="width:500px;height:100px;overflow-y:scroll">
+      <div>First MSG</div>
+    </div>
+
+    <form id="chat-form">
+      <input id="chat-input" type="text" style="width:500px"></input>
+    </form>
+  </div>
+
 </div>
 
 <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
@@ -41,7 +56,7 @@
       signDiv.style.display = 'none';
       gameDiv.style.display = 'inline-block';
     } else {
-      alter('Sign in unsuccessful.');
+      alertaw('Sign in unsuccessful.');
     }
   })
 
@@ -70,18 +85,27 @@
 
   }
 
+  //UI section
+
+  let changeMap = function() {
+    socket.emit('changeMap');
+  }
+
   //game stuff
+
+  const skins = ['/client/img/player1.png','/client/img/player2.png']
 
   const Img = {};
   Img.player = new Image();
   Img.player.src = '/client/img/player1.png';
   Img.bullet = new Image();
   Img.bullet.src = '/client/img/bullet.png';
-  Img.map = new Image();
-  Img.map.src = '/client/img/map.png';
+
 
   const ctx = document.getElementById("ctx").getContext("2d");
   ctx.font = '30px Arial';
+  const ctxUi = document.getElementById("ctx-ui").getContext("2d");
+  ctxUi.font = '30px Arial';
 
   const Player = function (initPack) {
     let self = {};
@@ -92,14 +116,18 @@
     self.hp = initPack.hp;
     self.maxHP = initPack.maxHP;
     self.score = initPack.score;
+    self.map = initPack.map;
 
     self.draw = function() {
+      if(Player.list[selfId].map !== self.map){
+        return;
+      }
       let x = self.x - Player.list[selfId].x + WIDTH/2;
       let y = self.y - Player.list[selfId].y + HEIGHT/2;
 
-      let hpWidth = 30 * self.hp / self.maxHP;
+      let hpWidth = 40 * self.hp / self.maxHP;
       ctx.fillStyle = 'red';
-      ctx.fillRect(x - hpWidth/2, y - 40, hpWidth, 4);
+      ctx.fillRect(x - hpWidth/2, y - 30, hpWidth, 4);
 
       let width = Img.player.width*2;
       let height = Img.player.height*2;
@@ -122,8 +150,12 @@
     self.number = initPack.number;
     self.x = initPack.x;
     self.y = initPack.y;
+    self.map = initPack.map;
 
     self.draw = function() {
+      if(Player.list[selfId].map !== self.map){
+        return;
+      }
       let width = Img.bullet.width/2;
       let height = Img.bullet.height/2;
 
@@ -167,6 +199,8 @@
           p.hp = pack.hp;
         if (pack.score !== undefined)
           p.score = pack.score;
+        if (pack.map !== undefined)
+          p.map = pack.map;
       }
     }
 
@@ -195,7 +229,7 @@
     if(!selfId)
       return;
     ctx.clearRect(0,0,500,500);
-    drawMap();
+    currentMap.draw();
     drawScore();
     for(let i in Player.list){
       Player.list[i].draw();
@@ -207,17 +241,46 @@
  },40);
 
 
-  const drawMap = function() {
-    let x = WIDTH/2 - Player.list[selfId].x;
-    let y = HEIGHT/2 - Player.list[selfId].y;
-    ctx.drawImage(Img.map,x,y);
+  const Maps = function(id, imgSrc, width, height) {
+    let self = {
+      id:id,
+      image: new Image(),
+      width: width,
+      height: height
+    }
+    self.image.src = imgSrc;
+
+    self.draw = function() {
+      let player = Player.list[selfId];
+      let x = WIDTH/2 - player.x;
+      let y = HEIGHT/2 - player.y;
+      ctx.drawImage(self.image,0,0,self.image.width,self.image.height,x,y,self.image.width*2,self.image.height*2);
+    }
+    return self;
   }
+
+
+  currentMap = Maps('field','/client/img/map.png',1280,960);
+  Img.map = {};
+  Img.map['field'] = new Image();
+  Img.map['field'].src = '/client/img/map.png';
+  Img.map['forest'] = new Image();
+  Img.map['forest'].src = '/client/img/map2.png';
+
+
+
 
   const drawScore = function() {
-    ctx.fillStyle = 'white';
-    ctx.fillText(Player.list[selfId].score,0,30);
+    if(lastScore === Player.list[selfId].score){
+      return;
+    }
+    ctxUi.clearRect(0,0,500,500);
+    lastScore = Player.list[selfId].score;
+    ctxUi.fillStyle = 'white';
+    ctxUi.fillText(Player.list[selfId].score,0,30);
   }
 
+  let lastScore = null;
 
   document.onkeydown = function (event){
     if(event.keyCode === 68) //d
