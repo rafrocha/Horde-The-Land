@@ -215,8 +215,9 @@
   });
 
   socket.on('update', function(data){
-    for(let i = 0; i < data.player.length; i++){
-      let pack = data.player[i];
+    let parsedData = JSON.parse(data);
+    for(let i = 0; i < parsedData.player.length; i++){
+      let pack = parsedData.player[i];
       let p = Player.list[pack.id];
       if (p) {
         if (pack.x !== undefined)
@@ -238,8 +239,8 @@
       }
     }
 
-    for(let i = 0; i < data.bullet.length; i++){
-      let pack = data.bullet[i];
+    for(let i = 0; i < parsedData.bullet.length; i++){
+      let pack = parsedData.bullet[i];
       let b = Bullet.list[pack.id];
       if (b) {
         if (pack.x !== undefined)

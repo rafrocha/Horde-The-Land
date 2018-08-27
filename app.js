@@ -180,14 +180,11 @@ const Player = function(param){
 
 Player.list = {};
 Player.onConnect = function (socket){
-  let map = 'forest';
-  if(Math.random() < 0.5){
-    map = 'field';
-  }
+
   const player = Player({
     id: socket.id,
     playername: socket.playername,
-    map: map
+    map: 'forest'
   });
 
   socket.on('keyPress',function(data){
@@ -248,14 +245,15 @@ Player.updateAll = function(){
   let pack = [];
   for(let i in Player.list){
     let player = Player.list[i];
-    let playerOld = JSON.stringify(player);
+    // let playerOld = JSON.stringify(player);
     player.update();
     player.getUpdatePack();
-    let newPlayerUpdated = JSON.stringify(player);
-    if(newPlayerUpdated !== playerOld){
-      pack.push(player);
-      return pack;
-    }
+    // let newPlayerUpdated = JSON.stringify(player);
+    // if(newPlayerUpdated !== playerOld){
+    //   pack.push(player);
+    //   return pack;
+    // }
+    pack.push(player)
   };
   return pack;
 };
@@ -460,8 +458,7 @@ setInterval(function(){
     let socket = SOCKET_LIST[i];
     socket.emit('init',initPack);
     if(pack.player.length > 0 || pack.bullet.length > 0){
-      socket.emit('update',pack);
-      console.log(pack);
+      socket.emit('update',JSON.stringify(pack));
     }
     socket.emit('remove',removePack);
   }
