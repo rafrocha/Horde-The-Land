@@ -248,16 +248,13 @@ Player.updateAll = function(){
   let pack = [];
   for(let i in Player.list){
     let player = Player.list[i];
-    let playerOld = Object.assign({},player);
+    let playerOld = JSON.stringify(player);
     player.update();
     player.getUpdatePack();
-    for(let key in player){
-      let attr = player[key];
-      let attrOld = playerOld[key];
-      if(attr !== attrOld){
-        pack.push(player);
-        return pack;
-      }
+    let newPlayerUpdated = JSON.stringify(player);
+    if(newPlayerUpdated !== playerOld){
+      pack.push(player);
+      return pack;
     }
   };
   return pack;
@@ -464,6 +461,7 @@ setInterval(function(){
     socket.emit('init',initPack);
     if(pack.player.length > 0 || pack.bullet.length > 0){
       socket.emit('update',pack);
+      console.log(pack);
     }
     socket.emit('remove',removePack);
   }
