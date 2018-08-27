@@ -66,8 +66,8 @@ const Player = function(param){
   self.pressingAttack = false;
   self.mouseAngle = 0;
   self.maxSpd = 10;
-  self.hp = 10;
-  self.maxHP = 10;
+  self.hp = 20;
+  self.maxHP = 20;
   self.score = 0;
   self.spriteAnimCounter = 0;
   self.bulletAngle = 0;
@@ -189,6 +189,13 @@ Player.onConnect = function (socket){
       player.mouseAngle = data.angle;}
     else if(data.inputId === 'mouseAngle')
       player.bulletAngle = data.state;
+  });
+
+  socket.on('sendMsgToServer', function(data){
+    let playerName = socket.playername;
+    for(let i in SOCKET_LIST){
+      SOCKET_LIST[i].emit('addToChat', playerName + ': ' + data);
+    }
   });
 
   socket.on('changeMap', function(data) {
@@ -341,14 +348,6 @@ io.sockets.on('connection', function(socket){
 
   //outputs on TERMINAL when a Player joins the game
   console.log('New player online');
-
-
-  socket.on('sendMsgToServer', function(data){
-    let playerName = socket.playername;
-    for(let i in SOCKET_LIST){
-      SOCKET_LIST[i].emit('addToChat', playerName + ': ' + data);
-    }
-  });
 
   socket.on('evalServer', function(data){
     if(!DEBUG){

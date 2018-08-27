@@ -58,6 +58,7 @@
     if(data.success){
       signDiv.style.display = 'none';
       gameDiv.style.display = 'inline-block';
+      focusCanvas();
     } else {
       alert('Sign in unsuccessful.');
     }
@@ -75,18 +76,8 @@
   let chatText = document.getElementById('chat-text');
   let chatForm = document.getElementById('chat-form');
   let chatInput = document.getElementById('chat-input');
+  chatInput.setAttribute('tabindex', 0);
 
-
-  chatForm.onsubmit = function(e){
-    e.preventDefault();
-    if(chatInput.value[0] === '/'){
-      socket.emit('evalServer', chatInput.value.slice(1));
-    } else {
-      socket.emit('sendMsgToServer', chatInput.value);
-    }
-    chatInput.value = '';
-
-  }
 
   //UI section
 
@@ -292,6 +283,9 @@
       let x = WIDTH/2 - player.x;
       let y = HEIGHT/2 - player.y;
       ctx.drawImage(self.image,0,0,self.image.width,self.image.height,x,y,self.image.width*4,self.image.height*4);
+      ctx.mozImageSmoothingEnabled = false;
+      ctx.msImageSmoothingEnabled = false;
+      ctx.imageSmoothingEnabled = false;
     }
     return self;
   }
@@ -319,7 +313,27 @@
 
   let lastScore = null;
 
-  document.onkeydown = function (event){
+  const canvas = document.getElementById("game");
+
+  canvas.oncontextmenu = function(event) {
+    event.preventDefault();
+  }
+
+  canvas.setAttribute('tabindex',0);
+  const focusCanvas = function() { canvas.focus();}
+  const blurCanvas = function() { canvas.blur();}
+  const focusChat = function() { chatInput.focus();}
+  const blurChat = function() { chatInput.blur();}
+  cancelPlayerKeyPress = function () {
+    socket.emit('keyPress', { inputId: 'left', state: false })
+    socket.emit('keyPress', { inputId: 'right', state: false })
+    socket.emit('keyPress', { inputId: 'up', state: false })
+    socket.emit('keyPress', { inputId: 'down', state: false })
+    socket.emit('keyPress', { inputId: 'attack', state: false })
+  }
+
+
+  canvas.onkeydown = function (event){
     if(event.keyCode === 68) //d
       socket.emit('keyPress', {inputId: 'right', state:true});
     else if(event.keyCode === 83) //s
@@ -328,9 +342,15 @@
       socket.emit('keyPress', {inputId: 'left', state:true});
     else if(event.keyCode === 87) //w
       socket.emit('keyPress', {inputId: 'up', state:true});
+    else if(event.keyCode === 13){
+      event.preventDefault();
+      cancelPlayerKeyPress();
+      blurCanvas();
+      focusChat();
+    }
   }
 
-  document.onkeyup = function (event){
+  canvas.onkeyup = function (event){
     if(event.keyCode === 68) //d
       socket.emit('keyPress', {inputId: 'right', state:false});
     else if(event.keyCode === 83) //s
@@ -341,29 +361,40 @@
       socket.emit('keyPress', {inputId: 'up', state:false});
   }
 
-  document.onmousedown = function(event){
+  canvas.onmousedown = function(event){
     let x = -400 + event.clientX - 8;
     let y = -400 + event.clientY - 8;
     let angle = Math.atan2(y,x) / Math.PI * 180;
     socket.emit('keyPress', {inputId: 'attack', state:true, angle:angle});
   }
 
-  document.onmouseup = function(event){
+  canvas.onmouseup = function(event){
     socket.emit('keyPress', {inputId: 'attack', state:false});
   }
 
-  const canvas = document.getElementById("ctx");
-
   const body = document.body.getBoundingClientRect()
 
-
-  document.onmousemove = function(event){
+  canvas.onmousemove = function(event){
     const body = document.body.getBoundingClientRect()
     let x = -body.right/2 + event.clientX - 8 ;
     let y = -400 + event.clientY - 8 ;
     let angle = Math.atan2(y,x) / Math.PI * 180;
     socket.emit('keyPress', {inputId: 'mouseAngle', state:angle});
   }
+
+  chatForm.onsubmit = function(e){
+    e.preventDefault();
+    if(chatInput.value[0] === '/'){
+      socket.emit('evalServer', chatInput.value.slice(1));
+    } else {
+      socket.emit('sendMsgToServer', chatInput.value);
+    }
+    chatInput.value = '';
+    blurChat();
+    focusCanvas();
+  }
+
+
 
 </script>
 
