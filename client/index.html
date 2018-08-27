@@ -39,7 +39,10 @@
 <script>
   const WIDTH = 1300;
   const HEIGHT = 800;
-  const socket = io();
+  var socket = io('hordetheland.herokuapp.com', {
+    path: '/socket.io-client',
+    transports: ['websocket']
+});
 
 
   //sign

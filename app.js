@@ -1,7 +1,10 @@
 const express = require('express');
 const app = express();
 const serv = require('http').Server(app);
-const io = require('socket.io')(serv,{});
+const io = require('socket.io')(serv, {
+  path: '/socket.io-client'
+});
+io.set('transports', ['websocket']);
 // const profiler = require('v8-profiler');
 // const fs = require('fs');
 const array = require('lodash/array');
