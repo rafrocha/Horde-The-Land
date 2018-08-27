@@ -101,10 +101,10 @@ const Player = function(param){
       self.y = 35;
     }
 
-    if(currentMap.isPositionWall(self)){
-      self.x = oldX;
-      self.y = oldY;
-    }
+    // if(currentMap.isPositionWall(self)){
+    //   self.x = oldX;
+    //   self.y = oldY;
+    // }
 
     if(self.pressingAttack){
       self.shootBullet(self.bulletAngle);
@@ -318,9 +318,9 @@ Bullet.updateAll = function(){
   for(let i in Bullet.list){
     let bullet = Bullet.list[i];
     bullet.update();
-    if(currentMap.isPositionWall(bullet)){
-      bullet.toRemove = true;
-    }
+    // if(currentMap.isPositionWall(bullet)){
+    //   bullet.toRemove = true;
+    // }
     if(bullet.toRemove){
       delete Bullet.list[i];
       removePack.bullet.push(bullet.id);
