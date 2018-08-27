@@ -72,6 +72,8 @@ const Player = function(param){
   self.mouseAngle = 0;
   self.maxSpd = 10;
   self.hp = 20;
+  self.rateOfFire = 200;
+  self.allowedToFire = true;
   self.maxHP = 20;
   self.score = 0;
   self.spriteAnimCounter = 0;
@@ -85,6 +87,12 @@ const Player = function(param){
     let oldY = self.y;
     self.updateSpd();
     super_update();
+
+    if(self.pressingAttack && self.allowedToFire){
+      self.shootBullet(self.bulletAngle);
+      self.allowedToFire = false;
+      setTimeout(() => {self.allowedToFire = true}, self.rateOfFire)
+    }
 
     if(self.pressingRight || self.pressingDown || self.pressingLeft ||self.pressingUp)
       self.spriteAnimCounter += 0.2;
@@ -101,14 +109,11 @@ const Player = function(param){
       self.y = 35;
     }
 
+    return true;
     // if(currentMap.isPositionWall(self)){
     //   self.x = oldX;
     //   self.y = oldY;
     // }
-
-    if(self.pressingAttack){
-      self.shootBullet(self.bulletAngle);
-    }
   }
 
   self.shootBullet = function(angle){
@@ -243,8 +248,17 @@ Player.updateAll = function(){
   let pack = [];
   for(let i in Player.list){
     let player = Player.list[i];
+    let playerOld = Object.assign({},player);
     player.update();
-    pack.push(player.getUpdatePack());
+    player.getUpdatePack();
+    for(let key in player){
+      let attr = player[key];
+      let attrOld = playerOld[key];
+      if(attr !== attrOld){
+        pack.push(player);
+        return pack;
+      }
+    }
   };
   return pack;
 };
@@ -253,8 +267,8 @@ Player.updateAll = function(){
 const Bullet = function(param){
   let self = Entity(param);
   self.id = Math.random();
-  self.spdX = Math.cos(param.angle/180*Math.PI) * 20;
-  self.spdY = Math.sin(param.angle/180*Math.PI) * 20;
+  self.spdX = Math.cos(param.angle/180*Math.PI) * 50;
+  self.spdY = Math.sin(param.angle/180*Math.PI) * 50;
   self.parent = param.parent;
 
 
@@ -263,7 +277,7 @@ const Bullet = function(param){
   let super_update = self.update;
 
   self.update = function(){
-    if(self.timer++ > 100){
+    if(self.timer++ > 50){
       self.toRemove = true;
     }
     super_update();
@@ -377,7 +391,6 @@ var arrayTile = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 
 var array2D = array.chunk(arrayTile,100);
 
-console.log(array2D);
 
 // var array2D = [];
 // for(var i = 0 ; i < 100; i++){
@@ -444,11 +457,14 @@ setInterval(function(){
     player: Player.updateAll(),
     bullet: Bullet.updateAll()
   }
+  // console.log(pack);
 
   for(let i in SOCKET_LIST){
     let socket = SOCKET_LIST[i];
     socket.emit('init',initPack);
-    socket.emit('update',pack);
+    if(pack.player.length > 0 || pack.bullet.length > 0){
+      socket.emit('update',pack);
+    }
     socket.emit('remove',removePack);
   }
 
