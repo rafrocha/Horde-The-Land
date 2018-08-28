@@ -482,7 +482,7 @@ setInterval(function(){
   removePack.player = [];
   removePack.bullet = [];
 
-}, 16);
+}, 40);
 
 
 // const startProfiling = function(duration) {
