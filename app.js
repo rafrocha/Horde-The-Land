@@ -465,7 +465,9 @@ setInterval(function(){
 
   for(let i in SOCKET_LIST){
     let socket = SOCKET_LIST[i];
-    socket.emit('init', initPack);
+    if(pack.player.length > 0 || pack.bullet.length > 0){
+      socket.emit('init', initPack);
+    }
     if(pack.player.length > 0 || pack.bullet.length > 0){
       socket.emit('update', jsonPack);
     }
