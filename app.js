@@ -255,7 +255,6 @@ Player.updateAll = function() {
     let newPlayerUpdated = JSON.stringify(player);
     if (newPlayerUpdated !== playerOld) {
       pack.push(player);
-      return pack;
     }
   };
 
