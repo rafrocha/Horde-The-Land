@@ -39,7 +39,7 @@
 <script>
   const WIDTH = 1300;
   const HEIGHT = 800;
-  var socket = io('https://hordetheland.herokuapp.com/', {
+  var socket = io('http://localhost:3000/', {
     path: '/socket.io-client',
     transports: ['websocket']
 });
@@ -200,21 +200,24 @@
   let selfId = null;
 
   socket.on('init', function(data){
-    if(data.selfId){
-      selfId = data.selfId;
+    let parsedData = data;
+    if(parsedData.selfId){
+      selfId = parsedData.selfId;
     }
-    for(let i = 0; i < data.player.length; i++){
-      new Player(data.player[i]);
+    for(let i = 0; i < parsedData.player.length; i++){
+      new Player(parsedData.player[i]);
     }
-    for(let i = 0; i < data.bullet.length; i++){
-      new Bullet(data.bullet[i]);
+    for(let i = 0; i < parsedData.bullet.length; i++){
+      new Bullet(parsedData.bullet[i]);
     }
-    if(data.map){
-      currentMap = new Maps(data.map[0]);
+    if(parsedData.map){
+      currentMap = new Maps(parsedData.map[0]);
     }
+    draw();
   });
 
   socket.on('update', function(data){
+    const start = Date.now()
     let parsedData = JSON.parse(data);
     for(let i = 0; i < parsedData.player.length; i++){
       let pack = parsedData.player[i];
@@ -249,18 +252,27 @@
           b.y = pack.y
       }
     }
+    const delta = Date.now() - start;
+
+    if(delta > 0) {
+      console.log(`${delta}ms update`)
+    }
+
+    draw();
   });
 
   socket.on('remove', function(data){
-    for(let i = 0; i < data.player.length; i++){
-      delete Player.list[data.player[i]];
+    let parsedData = JSON.parse(data);
+    for(let i = 0; i < parsedData.player.length; i++){
+      delete Player.list[parsedData.player[i]];
     }
-    for(let i = 0; i < data.bullet.length; i++){
-      delete Bullet.list[data.bullet[i]];
+    for(let i = 0; i < parsedData.bullet.length; i++){
+      delete Bullet.list[parsedData.bullet[i]];
     }
+    draw();
   });
 
-  setInterval(function () {
+ const draw = function() {
     if(!selfId)
       return;
     ctx.clearRect(0,0,1300,800);
@@ -273,7 +285,7 @@
     for(let i in Bullet.list){
       Bullet.list[i].draw();
     }
- },40);
+ }
 
 
   const Maps = function(initPack) {

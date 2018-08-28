@@ -242,6 +242,7 @@ Player.onDisconnect = function(socket){
 }
 
 Player.updateAll = function(){
+  const start = Date.now()
   let pack = [];
   for(let i in Player.list){
     let player = Player.list[i];
@@ -255,6 +256,11 @@ Player.updateAll = function(){
     // }
     pack.push(player)
   };
+  const delta = Date.now() - start;
+
+  // if(delta > 0) {
+  //   console.log(`${delta}ms update`)
+  // }
   return pack;
 };
 
@@ -452,15 +458,18 @@ setInterval(function(){
     player: Player.updateAll(),
     bullet: Bullet.updateAll()
   }
+  let jsonPack = JSON.stringify(pack);
+  let jsonRemovePack = JSON.stringify(removePack);
+
   // console.log(pack);
 
   for(let i in SOCKET_LIST){
     let socket = SOCKET_LIST[i];
-    socket.emit('init',initPack);
+    socket.emit('init', initPack);
     if(pack.player.length > 0 || pack.bullet.length > 0){
-      socket.emit('update',JSON.stringify(pack));
+      socket.emit('update', jsonPack);
     }
-    socket.emit('remove',removePack);
+    socket.emit('remove',jsonRemovePack);
   }
 
   initPack.player = [];
@@ -468,7 +477,7 @@ setInterval(function(){
   removePack.player = [];
   removePack.bullet = [];
 
-}, 1000/25);
+}, 16);
 
 
 // const startProfiling = function(duration) {
