@@ -415,7 +415,7 @@ const Maps = function(id, imgSrc, grid) {
       image: self.image,
       width: self.width,
       height: self.height,
-      grid: self.grid
+      // grid: self.grid
     }
   }
 
