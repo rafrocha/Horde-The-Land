@@ -493,6 +493,7 @@ setInterval(function() {
 
   initPack.player = [];
   initPack.bullet = [];
+  initPack.map = [];
   removePack.player = [];
   removePack.bullet = [];
 
