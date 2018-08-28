@@ -78,7 +78,7 @@ const Player = function(param) {
   self.mouseAngle = 0;
   self.maxSpd = 10;
   self.hp = 20;
-  self.rateOfFire = 200;
+  self.rateOfFire = 100;
   self.allowedToFire = true;
   self.maxHP = 20;
   self.score = 0;
@@ -208,8 +208,8 @@ Player.onConnect = function(socket) {
     } else if (data.inputId === 'attack') {
       player.goAttack = data.state;
       player.mouseAngle = data.angle;
-      player.bulletAngle = data.angle;
-    }
+    } else if (data.inputId === 'mouseAngle')
+        player.bulletAngle = data.state;
   });
 
   socket.on('sendMsgToServer', function(data) {
@@ -247,6 +247,21 @@ Player.onDisconnect = function(socket) {
   removePack.player.push(socket.id);
 }
 
+Player.makeCopy = function(player) {
+  let copy = {
+    id: player.id,
+    x: player.x,
+    y: player.y,
+    hp: player.hp,
+    score: player.score,
+    map: player.map,
+    mouseAngle: player.mouseAngle,
+    spriteCalc: player.spriteCalc,
+    bulletAngle: player.bulletAngle
+  }
+  return copy;
+}
+
 Player.updateAll = function() {
   const start = Date.now()
   let pack = [];
@@ -255,9 +270,10 @@ Player.updateAll = function() {
     let playerOld = JSON.stringify(player);
     player.update();
     player.getUpdatePack();
+    let copy = Player.makeCopy(player);
     let newPlayerUpdated = JSON.stringify(player);
     if (newPlayerUpdated !== playerOld) {
-      pack.push(player);
+      pack.push(copy);
     }
   };
 

@@ -435,12 +435,12 @@
   }
 
 
-  // canvas.onmousemove = function(event){
-  //   let x = -body.right/2 + event.clientX - 8 ;
-  //   let y = -400 + event.clientY - 8 ;
-  //   let angle = Math.floor(Math.atan2(y,x) / Math.PI * 180);
-  //   socket.emit('keyPress', {inputId: 'mouseAngle', state:angle});
-  // }
+  canvas.onmousemove = function(event){
+    let x = -body.right/2 + event.clientX - 8 ;
+    let y = -400 + event.clientY - 8 ;
+    let angle = Math.floor(Math.atan2(y,x) / Math.PI * 180);
+    socket.emit('keyPress', {inputId: 'mouseAngle', state:angle});
+  }
 
   chatForm.onsubmit = function(e){
     e.preventDefault();
