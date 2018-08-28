@@ -241,15 +241,16 @@
           p.bulletAngle = pack.bulletAngle;
       }
     }
-
-    for(let i = 0; i < parsedData.bullet.length; i++){
-      let pack = parsedData.bullet[i];
-      let b = Bullet.list[pack.id];
-      if (b) {
-        if (pack.x !== undefined)
-          b.x = pack.x
-        if (pack.y !== undefined)
-          b.y = pack.y
+    if(parsedData.bullet){
+      for(let i = 0; i < parsedData.bullet.length; i++){
+        let pack = parsedData.bullet[i];
+        let b = Bullet.list[pack.id];
+        if (b) {
+          if (pack.x !== undefined)
+            b.x = pack.x
+          if (pack.y !== undefined)
+            b.y = pack.y
+        }
       }
     }
 
