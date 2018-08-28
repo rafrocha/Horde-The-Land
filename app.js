@@ -70,11 +70,11 @@ const Entity = function(param) {
 const Player = function(param) {
   let self = Entity(param);
   self.number = "" + Math.floor(50 * Math.random());
-  self.pressingRight = false;
-  self.pressingLeft = false;
-  self.pressingUp = false;
-  self.pressingDown = false;
-  self.pressingAttack = false;
+  self.goRight = false;
+  self.goLeft = false;
+  self.goUp = false;
+  self.goDown = false;
+  self.goAttack = false;
   self.mouseAngle = 0;
   self.maxSpd = 10;
   self.hp = 20;
@@ -82,7 +82,7 @@ const Player = function(param) {
   self.allowedToFire = true;
   self.maxHP = 20;
   self.score = 0;
-  self.spriteAnimCounter = 0;
+  self.spriteCalc = 0;
   self.bulletAngle = 0;
   self.playername = param.playername;
 
@@ -94,14 +94,14 @@ const Player = function(param) {
     self.updateSpd();
     super_update();
 
-    if (self.pressingAttack && self.allowedToFire) {
+    if (self.goAttack && self.allowedToFire) {
       self.shootBullet(self.bulletAngle);
       self.allowedToFire = false;
       setTimeout(() => { self.allowedToFire = true }, self.rateOfFire)
     }
 
-    if (self.pressingRight || self.pressingDown || self.pressingLeft || self.pressingUp)
-      self.spriteAnimCounter += 0.2;
+    if (self.goRight || self.goDown || self.goLeft || self.goUp)
+      self.spriteCalc += 0.2;
     if (self.x > 3200 - 20) {
       self.x = 3200 - 20;
     }
@@ -133,15 +133,15 @@ const Player = function(param) {
 
   self.updateSpd = function() {
 
-    if (self.pressingRight) {
+    if (self.goRight) {
       self.spdX = self.maxSpd;
-    } else if (self.pressingLeft) {
+    } else if (self.goLeft) {
       self.spdX = -self.maxSpd;
     } else self.spdX = 0;
 
-    if (self.pressingUp) {
+    if (self.goUp) {
       self.spdY = -self.maxSpd;
-    } else if (self.pressingDown) {
+    } else if (self.goDown) {
       self.spdY = self.maxSpd;
     } else self.spdY = 0;
   }
@@ -157,7 +157,7 @@ const Player = function(param) {
       score: self.score,
       map: self.map,
       mouseAngle: self.mouseAngle,
-      spriteAnimCounter: self.spriteAnimCounter,
+      spriteCalc: self.spriteCalc,
       bulletAngle: self.bulletAngle,
       playername: self.playername
     }
@@ -172,7 +172,7 @@ const Player = function(param) {
       score: self.score,
       map: self.map,
       mouseAngle: self.mouseAngle,
-      spriteAnimCounter: self.spriteAnimCounter,
+      spriteCalc: self.spriteCalc,
       bulletAngle: self.bulletAngle
     }
   }
@@ -195,21 +195,21 @@ Player.onConnect = function(socket) {
   socket.on('keyPress', function(data) {
     if (data.inputId === 'left') {
       player.mouseAngle = 135;
-      player.pressingLeft = data.state;
+      player.goLeft = data.state;
     } else if (data.inputId === 'right') {
       player.mouseAngle = 44;
-      player.pressingRight = data.state;
+      player.goRight = data.state;
     } else if (data.inputId === 'up') {
       player.mouseAngle = 225;
-      player.pressingUp = data.state;
+      player.goUp = data.state;
     } else if (data.inputId === 'down') {
       player.mouseAngle = 45;
-      player.pressingDown = data.state;
+      player.goDown = data.state;
     } else if (data.inputId === 'attack') {
-      player.pressingAttack = data.state;
+      player.goAttack = data.state;
       player.mouseAngle = data.angle;
-    } else if (data.inputId === 'mouseAngle')
-      player.bulletAngle = data.state;
+      player.bulletAngle = data.angle;
+    }
   });
 
   socket.on('sendMsgToServer', function(data) {
@@ -486,11 +486,13 @@ setInterval(function() {
 
   for (let i in SOCKET_LIST) {
     let socket = SOCKET_LIST[i];
-    socket.emit('init', initPack);
+    if (initPack.player.length > 0 || initPack.bullet.length > 0 || initPack.map.length > 0)
+      socket.emit('init', initPack);
     if (pack.player.length > 0 || pack.bullet.length > 0) {
       socket.emit('update', jsonPack);
     }
-    socket.emit('remove', jsonRemovePack);
+    // if (removePack.player.length > 0 || removePack.bullet.length > 0)
+      socket.emit('remove', jsonRemovePack);
   }
 
   initPack.player = [];

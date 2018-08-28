@@ -116,7 +116,7 @@
     self.score = initPack.score;
     self.map = initPack.map;
     self.mouseAngle = initPack.mouseAngle;
-    self.spriteAnimCounter = initPack.spriteAnimCounter;
+    self.spriteCalc = initPack.spriteCalc;
     self.bulletAngle = initPack.bulletAngle;
     self.playername = initPack.playername;
 
@@ -157,7 +157,7 @@
       else if(angle >= 225 && angle < 315 )
         directionMod = 0;
 
-      let walkingMod = Math.floor(self.spriteAnimCounter) % 3;
+      let walkingMod = Math.floor(self.spriteCalc) % 3;
 
       ctx.drawImage(Img.player,walkingMod*frameWidth,directionMod*frameHeight,frameWidth,frameHeight, x-width/2,y-height/2,width,height);
 
@@ -239,8 +239,8 @@
           p.map = pack.map;
         if (pack.mouseAngle !== undefined)
           p.mouseAngle = pack.mouseAngle;
-        if (pack.spriteAnimCounter !== undefined)
-          p.spriteAnimCounter = pack.spriteAnimCounter;
+        if (pack.spriteCalc !== undefined)
+          p.spriteCalc = pack.spriteCalc;
         if (pack.bulletAngle !== undefined)
           p.bulletAngle = pack.bulletAngle;
       }
@@ -432,12 +432,12 @@
   }
 
 
-  canvas.onmousemove = function(event){
-    let x = -body.right/2 + event.clientX - 8 ;
-    let y = -400 + event.clientY - 8 ;
-    let angle = Math.floor(Math.atan2(y,x) / Math.PI * 180);
-    socket.emit('keyPress', {inputId: 'mouseAngle', state:angle});
-  }
+  // canvas.onmousemove = function(event){
+  //   let x = -body.right/2 + event.clientX - 8 ;
+  //   let y = -400 + event.clientY - 8 ;
+  //   let angle = Math.floor(Math.atan2(y,x) / Math.PI * 180);
+  //   socket.emit('keyPress', {inputId: 'mouseAngle', state:angle});
+  // }
 
   chatForm.onsubmit = function(e){
     e.preventDefault();
