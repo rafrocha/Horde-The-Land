@@ -491,7 +491,7 @@ setInterval(function() {
     if (pack.player.length > 0 || pack.bullet.length > 0) {
       socket.emit('update', jsonPack);
     }
-    // if (removePack.player.length > 0 || removePack.bullet.length > 0)
+    if (removePack.player.length > 0 || removePack.bullet.length > 0)
       socket.emit('remove', jsonRemovePack);
   }
 

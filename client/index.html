@@ -12,6 +12,7 @@
 
     <div id="game" style="position:absolute;width:1300px;height:100px;">
       <canvas id="ctx" width="1300" height="800" style="position:absolute;border:1px solid black;background-color: black;"></canvas>
+      <canvas id="ctx-ent" width="1300" height="800" style="position:absolute;border:1px solid black;"></canvas>
       <canvas id="ctx-ui" width="1300" height="800" style="position:absolute;border:1px solid black;"></canvas>
 
       <div id="ui" style="position:absolute;width:1300px;height:800px;">
@@ -62,6 +63,7 @@
     if(data.success){
       signDiv.style.display = 'none';
       gameDiv.style.display = 'inline-block';
+      currentMap.draw();
       focusCanvas();
     } else {
       alert('Sign in unsuccessful.');
@@ -102,6 +104,8 @@
 
   const ctx = document.getElementById("ctx").getContext("2d");
   ctx.font = '30px Arial';
+  const ctxEnt = document.getElementById("ctx-ent").getContext("2d");
+  ctxEnt.font = '30px Arial';
   const ctxUi = document.getElementById("ctx-ui").getContext("2d");
   ctxUi.font = '30px Arial';
 
@@ -129,14 +133,14 @@
 
       let hpWidth = 40 * self.hp / self.maxHP;
 
-      ctx.fillStyle = 'red';
-      ctx.fillRect(x - 40/2, y - 35, 40, 4);
-      ctx.fillStyle = 'blue';
-      ctx.fillRect(x - 40/2, y - 35, hpWidth, 4);
+      ctxEnt.fillStyle = 'red';
+      ctxEnt.fillRect(x - 40/2, y - 35, 40, 4);
+      ctxEnt.fillStyle = 'blue';
+      ctxEnt.fillRect(x - 40/2, y - 35, hpWidth, 4);
 
-      ctx.fillStyle = 'black';
-      ctx.font = '18px Arial'
-      ctx.fillText(self.playername,x - 40/2,y - 39);
+      ctxEnt.fillStyle = 'black';
+      ctxEnt.font = '18px Arial'
+      ctxEnt.fillText(self.playername,x - 40/2,y - 39);
 
       let width = Img.player.width/1.2;
       let height = Img.player.height/1.5;
@@ -159,7 +163,7 @@
 
       let walkingMod = Math.floor(self.spriteCalc) % 3;
 
-      ctx.drawImage(Img.player,walkingMod*frameWidth,directionMod*frameHeight,frameWidth,frameHeight, x-width/2,y-height/2,width,height);
+      ctxEnt.drawImage(Img.player,walkingMod*frameWidth,directionMod*frameHeight,frameWidth,frameHeight, x-width/2,y-height/2,width,height);
 
     }
 
@@ -189,7 +193,7 @@
       let y = self.y - Player.list[selfId].y + HEIGHT/2;
 
 
-      ctx.drawImage(Img.bullet,0,0,Img.bullet.width,Img.bullet.height, x-width/2,y-height/2,width,height);
+      ctxEnt.drawImage(Img.bullet,0,0,Img.bullet.width,Img.bullet.height, x-width/2,y-height/2,width,height);
     }
 
     Bullet.list[self.id] = self;
@@ -215,6 +219,7 @@
       console.log(parsedData.map)
       currentMap = new Maps(parsedData.map[0]);
     }
+    currentMap.draw();
     draw();
   });
 
@@ -258,7 +263,6 @@
         }
       }
     }
-
     drawUpdate();
   });
 
@@ -270,7 +274,7 @@
     for(let i = 0; i < parsedData.bullet.length; i++){
       delete Bullet.list[parsedData.bullet[i]];
     }
-    draw();
+    drawUpdate();
   });
 
  const draw = function() {
@@ -278,8 +282,7 @@
 
     if(!selfId)
       return;
-    ctx.clearRect(0,0,1300,800);
-    currentMap.draw();
+    ctxEnt.clearRect(0,0,1300,800);
     drawScore();
     for(let i in Player.list){
       Player.list[i].draw();
@@ -296,7 +299,10 @@
  }
 
  const drawUpdate = function() {
-    const start = Date.now()
+
+    ctxEnt.clearRect(0,0,1300,800);
+    ctx.clearRect(0,0,1300,800);
+    currentMap.draw();
 
     if(!selfId)
       return;
@@ -307,11 +313,6 @@
 
     for(let i in Bullet.list){
       Bullet.list[i].draw();
-    }
-    const delta = Date.now() - start;
-
-    if(delta > 10) {
-      console.log(`${delta}ms update`)
     }
  }
 
@@ -337,6 +338,8 @@
     // }
 
     self.draw = function() {
+      if(!selfId)
+        return;
       let player = Player.list[selfId];
       let x = WIDTH/2 - player.x;
       let y = HEIGHT/2 - player.y;
