@@ -1,3 +1,4 @@
+<script type="text/javascript" src="/client/bison.js"></script>
 <body style="display: flex;justify-content: center;">
   <div id="signDiv">
     Username: <input id="signDiv-username" type="text"></input><br>
@@ -219,9 +220,11 @@
 
   socket.on('update', function(data){
     const start = Date.now()
-    let parsedData = JSON.parse(data);
+    let parsedData = BISON.decode(data);
+    // console.log(parsedData);
     for(let i = 0; i < parsedData.player.length; i++){
       let pack = parsedData.player[i];
+      console.log(pack.bulletAngle);
       let p = Player.list[pack.id];
       if (p) {
         if (pack.x !== undefined)
@@ -245,6 +248,7 @@
     if(parsedData.bullet){
       for(let i = 0; i < parsedData.bullet.length; i++){
         let pack = parsedData.bullet[i];
+        console.log(pack);
         let b = Bullet.list[pack.id];
         if (b) {
           if (pack.x !== undefined)
@@ -259,7 +263,7 @@
   });
 
   socket.on('remove', function(data){
-    let parsedData = JSON.parse(data);
+    let parsedData = BISON.decode(data);
     for(let i = 0; i < parsedData.player.length; i++){
       delete Player.list[parsedData.player[i]];
     }
@@ -419,7 +423,7 @@
   canvas.onmousedown = function(event){
     let x = -body.right/2 + event.clientX - 8;
     let y = -400 + event.clientY - 8;
-    let angle = Math.atan2(y,x) / Math.PI * 180;
+    let angle = Math.floor(Math.atan2(y,x) / Math.PI * 180);
     socket.emit('keyPress', {inputId: 'attack', state:true, angle:angle});
   }
 
@@ -431,7 +435,7 @@
   canvas.onmousemove = function(event){
     let x = -body.right/2 + event.clientX - 8 ;
     let y = -400 + event.clientY - 8 ;
-    let angle = Math.atan2(y,x) / Math.PI * 180;
+    let angle = Math.floor(Math.atan2(y,x) / Math.PI * 180);
     socket.emit('keyPress', {inputId: 'mouseAngle', state:angle});
   }
 

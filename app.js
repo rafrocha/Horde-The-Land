@@ -5,6 +5,9 @@ const io = require('socket.io')(serv, {
   path: '/socket.io-client'
 });
 io.set('transports', ['websocket']);
+const BISON = require('./client/bison.js');
+
+
 const compress = require('compression');
 // const profiler = require('v8-profiler');
 // const fs = require('fs');
@@ -267,9 +270,9 @@ Player.updateAll = function() {
 
 const Bullet = function(param) {
   let self = Entity(param);
-  self.id = Math.random();
-  self.spdX = Math.cos(param.angle / 180 * Math.PI) * 50;
-  self.spdY = Math.sin(param.angle / 180 * Math.PI) * 50;
+  self.id = Math.floor(Math.random() * 1000);
+  self.spdX = Math.floor(Math.cos(param.angle / 180 * Math.PI) * 50);
+  self.spdY = Math.floor(Math.sin(param.angle / 180 * Math.PI) * 50);
   self.parent = param.parent;
 
 
@@ -309,10 +312,10 @@ const Bullet = function(param) {
               y: p.y
             }]
           }
-          socket.emit('update', JSON.stringify(data));
+          socket.emit('update', BISON.encode(data));
           delete Bullet.list[self.id];
           removePack.bullet.push(self.id);
-          socket.emit('remove', JSON.stringify(removePack));
+          socket.emit('remove', BISON.encode(removePack));
         }
       }
     }
@@ -434,7 +437,7 @@ let DEBUG = true;
 
 io.sockets.on('connection', function(socket) {
   currentMap = Maps('field', '/client/img/map.png', array2D);
-  socket.id = Math.random();
+  socket.id = Math.floor(Math.random() * 1000);
   SOCKET_LIST[socket.id] = socket
 
   socket.on('signIn', function(data) {
@@ -476,8 +479,8 @@ setInterval(function() {
   }
 
 
-  let jsonPack = JSON.stringify(pack);
-  let jsonRemovePack = JSON.stringify(removePack);
+  let jsonPack = BISON.encode(pack);
+  let jsonRemovePack = BISON.encode(removePack);
 
   // console.log(pack);
 
