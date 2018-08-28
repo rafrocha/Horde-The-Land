@@ -210,7 +210,8 @@
     for(let i = 0; i < parsedData.bullet.length; i++){
       new Bullet(parsedData.bullet[i]);
     }
-    if(parsedData.map){
+    if(parsedData.map && parsedData.map.length > 0){
+      console.log(parsedData.map)
       currentMap = new Maps(parsedData.map[0]);
     }
     draw();
