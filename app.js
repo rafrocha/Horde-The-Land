@@ -496,7 +496,7 @@ setInterval(function() {
   removePack.player = [];
   removePack.bullet = [];
 
-}, 16);
+}, 32;
 
 
 // const startProfiling = function(duration) {
