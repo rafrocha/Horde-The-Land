@@ -5,11 +5,14 @@ const io = require('socket.io')(serv, {
   path: '/socket.io-client'
 });
 io.set('transports', ['websocket']);
+const compress = require('compression');
 // const profiler = require('v8-profiler');
 // const fs = require('fs');
 const array = require('lodash/array');
 
 const PORT = process.env.PORT || 3000;
+
+app.use(compress());
 
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/client/index.html');
